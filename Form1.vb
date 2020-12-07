@@ -465,11 +465,11 @@ Public Class Form1
             If (v1.Op(op).RR <> v2.Op(op).RR) Then Return (False)
             If (v1.Op(op).D1L <> v2.Op(op).D1L) Then Return (False)
             ' If (Math.Abs(v1.Op(op).TL - v2.Op(op).TL) > TL_Tol) Then Return (False)
-            ' If (v1.Op(op).KS <> v2.Op(op).KS) Then Return (False)
-            ' If (v1.Op(op).MUL <> v2.Op(op).MUL) Then Return (False)
-            ' If (v1.Op(op).DT1 <> v2.Op(op).DT1) Then Return (False)
+            If (v1.Op(op).KS <> v2.Op(op).KS) Then Return (False)
+            If (v1.Op(op).MUL <> v2.Op(op).MUL) Then Return (False)
+            If (v1.Op(op).DT1 <> v2.Op(op).DT1) Then Return (False)
             If (v1.Op(op).DT2 <> v2.Op(op).DT2) Then Return (False)
-            ' If (v1.Op(op).SSGEG <> v2.Op(op).SSGEG) Then Return (False)
+            If (v1.Op(op).SSGEG <> v2.Op(op).SSGEG) Then Return (False)
             If (v1.Op(op).AME <> v2.Op(op).AME) Then Return (False)
 
         Next
@@ -616,21 +616,23 @@ Public Class Form1
         curr_voice.Voice.CON = Registers(&HB0 + chan + 256 * chip) And 7
         ' Slot
         curr_voice.Voice.SLOT = (Registers(&H28 + 256 * chip) >> 4) And &HF
+        curr_voice.Voice.AMS = 0
+        curr_voice.Voice.PMS = 0
         curr_voice.Voice.NE = 0
 
         For op = 0 To 3
 
-            curr_voice.Voice.Op(op).AR = Registers(&H50 + chan + (op * 8) + 256 * chip) And 31
-            curr_voice.Voice.Op(op).D1R = Registers(&H60 + chan + (op * 8) + 256 * chip) And 31
+            curr_voice.Voice.Op(op).AR = Registers(&H50 + chan + (op * 4) + 256 * chip) And 31
+            curr_voice.Voice.Op(op).D1R = Registers(&H60 + chan + (op * 4) + 256 * chip) And 31
             curr_voice.Voice.Op(op).D2R = 0
-            curr_voice.Voice.Op(op).RR = Registers(&H80 + chan + (op * 8) + 256 * chip) And 15
+            curr_voice.Voice.Op(op).RR = Registers(&H80 + chan + (op * 4) + 256 * chip) And 15
             curr_voice.Voice.Op(op).D1L = 0
-            curr_voice.Voice.Op(op).TL = Registers(&H40 + chan + (op * 8) + 256 * chip) And 127
-            curr_voice.Voice.Op(op).KS = (Registers(&H50 + chan + (op * 8) + 256 * chip) >> 6) And 3
-            curr_voice.Voice.Op(op).MUL = Registers(&H30 + chan + (op * 8) + 256 * chip) And 15
-            curr_voice.Voice.Op(op).DT1 = (Registers(&H30 + chan + (op * 8) + 256 * chip) >> 4) And 7
+            curr_voice.Voice.Op(op).TL = Registers(&H40 + chan + (op * 4) + 256 * chip) And 127
+            curr_voice.Voice.Op(op).KS = (Registers(&H50 + chan + (op * 4) + 256 * chip) >> 6) And 3
+            curr_voice.Voice.Op(op).MUL = Registers(&H30 + chan + (op * 4) + 256 * chip) And 15
+            curr_voice.Voice.Op(op).DT1 = (Registers(&H30 + chan + (op * 4) + 256 * chip) >> 4) And 7
             curr_voice.Voice.Op(op).DT2 = 0
-            curr_voice.Voice.Op(op).SSGEG = Registers(&H90 + chan + (op * 8) + 256 * chip) And 15
+            curr_voice.Voice.Op(op).SSGEG = Registers(&H90 + chan + (op * 4) + 256 * chip) And 15
             curr_voice.Voice.Op(op).AME = 0
         Next
 
@@ -706,7 +708,7 @@ Public Class Form1
             curr_voice.Voice.Op(op).MUL = Registers(&H30 + chan + (op * 4) + 256 * port) And 15
             curr_voice.Voice.Op(op).DT1 = (Registers(&H30 + chan + (op * 4) + 256 * port) >> 4) And 7
             curr_voice.Voice.Op(op).DT2 = 0
-            curr_voice.Voice.Op(op).SSGEG = Registers(&H90 + chan + (op * 8) + 256 * port) And 15
+            curr_voice.Voice.Op(op).SSGEG = Registers(&H90 + chan + (op * 4) + 256 * port) And 15
             curr_voice.Voice.Op(op).AME = 0
         Next
 
@@ -723,7 +725,7 @@ Public Class Form1
             curr_voice.Voice.Op(op).MUL = Registers(&H30 + chan + (op * 4) + 256 * port) And 15
             curr_voice.Voice.Op(op).DT1 = (Registers(&H30 + chan + (op * 4) + 256 * port) >> 4) And 7
             curr_voice.Voice.Op(op).DT2 = 0
-            curr_voice.Voice.Op(op).SSGEG = Registers(&H90 + chan + (op * 8) + 256 * port) And 15
+            curr_voice.Voice.Op(op).SSGEG = Registers(&H90 + chan + (op * 4) + 256 * port) And 15
             curr_voice.Voice.Op(op).AME = 0
         Next
 
@@ -799,7 +801,7 @@ Public Class Form1
             curr_voice.Voice.Op(op).MUL = Registers(&H30 + chan + (op * 4) + 256 * port) And 15
             curr_voice.Voice.Op(op).DT1 = (Registers(&H30 + chan + (op * 4) + 256 * port) >> 4) And 7
             curr_voice.Voice.Op(op).DT2 = 0
-            curr_voice.Voice.Op(op).SSGEG = Registers(&H90 + chan + (op * 8) + 256 * port) And 15
+            curr_voice.Voice.Op(op).SSGEG = Registers(&H90 + chan + (op * 4) + 256 * port) And 15
             curr_voice.Voice.Op(op).AME = 0
         Next
 
@@ -816,7 +818,7 @@ Public Class Form1
             curr_voice.Voice.Op(op).MUL = Registers(&H30 + chan + (op * 4) + 256 * port) And 15
             curr_voice.Voice.Op(op).DT1 = (Registers(&H30 + chan + (op * 4) + 256 * port) >> 4) And 7
             curr_voice.Voice.Op(op).DT2 = 0
-            curr_voice.Voice.Op(op).SSGEG = Registers(&H90 + chan + (op * 8) + 256 * port) And 15
+            curr_voice.Voice.Op(op).SSGEG = Registers(&H90 + chan + (op * 4) + 256 * port) And 15
             curr_voice.Voice.Op(op).AME = 0
         Next
 

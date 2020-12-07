@@ -1,6 +1,5 @@
 ﻿Imports System.IO
 Imports System.IO.Compression
-Imports System.Security.Cryptography
 
 Namespace Util
     Public Class FileHandler
