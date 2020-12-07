@@ -318,7 +318,7 @@ Public Class Form1
 
     Dim utf8WithoutBom As New System.Text.UTF8Encoding(False)
     Dim in_file As MemoryStream
-    Dim szFileName As String
+    Dim szOrigFileName As String
     Dim filepos As Integer
     Dim filelength As Integer
     Dim d(3) As Byte
@@ -1547,7 +1547,7 @@ Public Class Form1
                 'ListBox1.Items.Add("data block at " + filepos.ToString)
                 'data block..
                 Dim iDataType, iDataLength As Integer
-                Dim szFileName As String = RemoveFileExt(szFileName)
+                Dim szFileName As String = RemoveFileExt(szOrigFileName)
                 Dim byteData(&H100000) As Byte
 
                 ' 0x66: Compatibility Command to Make Players Stop Parsing The Stream 
@@ -2101,7 +2101,7 @@ Public Class Form1
 
         ' Get File Name From The Text Box And Create an File Stream
         hTmp = New FileStream(TextBox1.Text, FileMode.Open)
-        szFileName = hTmp.Name
+        szOrigFileName = hTmp.Name
         hTmp.Read(d, 0, 3)
         hTmp.Close()
         If ((d(0) = &H1F) And (d(1) = &H8B)) Then
