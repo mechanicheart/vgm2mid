@@ -2,7 +2,10 @@
 
 Public Class VGMFile
     ' 256 Files (Maximum)
-    Dim hFileList(255) As FileStream
+    Dim hFileList(255) As MemoryStream
+    ' File Count
+    Dim iFileCount As Integer
+
     ' Current VGM Version (1.71 Beta)
     Dim iVGMVersion As Integer = 171
     Dim szChipTag As String() = New String(63) {
@@ -68,11 +71,26 @@ Public Class VGMFile
     End Enum
 
     Public Sub open(file As String())
+        Dim hFile As FileStream
         Dim i As Integer
 
         For i = 0 To file.Length()
-            hFileList(i) = New FileStream(file(i), FileMode.Open)
+            hFile = New FileStream(file(i), FileMode.Open)
+            hFile.CopyTo(hFileList(i))
+            hFile.Close()
         Next
+
+        iFileCount = file.Length()
+
+    End Sub
+
+    Public Sub close()
+        For i = 0 To iFileCount
+            hFileList(i).Close()
+        Next
+    End Sub
+
+    Public Sub parse()
 
     End Sub
 

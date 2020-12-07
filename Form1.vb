@@ -3,6 +3,9 @@ Imports System.Text
 Imports System.Math
 Imports System.Xml.XPath
 
+Imports VGM2MID.Util
+Imports System.IO.Compression
+
 Public Class Form1
 
     ' VGM Info Struct
@@ -314,7 +317,8 @@ Public Class Form1
     ' *** Global Variables ***
 
     Dim utf8WithoutBom As New System.Text.UTF8Encoding(False)
-    Dim in_file As FileStream
+    Dim in_file As MemoryStream
+    Dim szFileName As String
     Dim filepos As Integer
     Dim filelength As Integer
     Dim d(3) As Byte
@@ -1543,7 +1547,7 @@ Public Class Form1
                 'ListBox1.Items.Add("data block at " + filepos.ToString)
                 'data block..
                 Dim iDataType, iDataLength As Integer
-                Dim szFileName As String = RemoveFileExt(in_file.Name)
+                Dim szFileName As String = RemoveFileExt(szFileName)
                 Dim byteData(&H100000) As Byte
 
                 ' 0x66: Compatibility Command to Make Players Stop Parsing The Stream 
@@ -2079,24 +2083,43 @@ Public Class Form1
         Dim temp As Double
         Dim BPM_Period As Integer
 
+        Dim hFile, hTmp As FileStream
+        Dim hGZFile As GZipStream
+
         ' Clear The Status List
         ListBox1.Items.Clear()
         ListBox2.Items.Clear()
 
         'we need to check if file is already open
-
         If (in_file IsNot Nothing) Then in_file.Close()
+
+        ' Initialize
+        in_file = New MemoryStream()
 
         ' Check if the input string is not an illegal path
         If Dir(TextBox1.Text) = "" Then Exit Sub
 
         ' Get File Name From The Text Box And Create an File Stream
-        in_file = New FileStream(TextBox1.Text, FileMode.Open)
+        hTmp = New FileStream(TextBox1.Text, FileMode.Open)
+        szFileName = hTmp.Name
+        hTmp.Read(d, 0, 3)
+        hTmp.Close()
+        If ((d(0) = &H1F) And (d(1) = &H8B)) Then
+            hGZFile = FileHandler.GZRead(TextBox1.Text)
+            hGZFile.CopyTo(in_file)
+            hGZFile.Close()
+        Else
+            hFile = New FileStream(TextBox1.Text, FileMode.Open)
+            hFile.CopyTo(in_file)
+            hFile.Close()
+        End If
 
+        ' Rewind
+        in_file.Seek(0, SeekOrigin.Begin)
+        in_file.Read(d, 0, 4)
         '''''''''''''''''''''''''''''''''''''''''''''''''''''
         ' Parse VGM File 
         ' + Check File Dummy Header 'Vgm '(0x56 0x67 0x6d 0x20)
-        in_file.Read(d, 0, 4)
         If (BytesToText(d, 4) <> "Vgm ") Then in_file.Close() : Exit Sub
 
         ' + Get VGM File Size -> filelength
@@ -2505,7 +2528,23 @@ Public Class Form1
 
     End Sub
 
+    Private Sub RewindFileStream(fp As MemoryStream, addr As Integer)
+
+        fp.Seek(addr, SeekOrigin.Begin)
+
+    End Sub
+
     Private Function ReadDword(fp As FileStream) As Integer
+
+        Dim dwBuf(3) As Byte
+
+        fp.Read(dwBuf, 0, 4)
+
+        Return BytesToInt32(dwBuf)
+
+    End Function
+
+    Private Function ReadDword(fp As MemoryStream) As Integer
 
         Dim dwBuf(3) As Byte
 
@@ -2525,6 +2564,16 @@ Public Class Form1
     End Function
 
     Private Function ReadDwordAddr(fp As FileStream, addr As Integer) As Integer
+        Dim dwBuf(3) As Byte
+
+        RewindFileStream(fp, addr)
+        fp.Read(dwBuf, 0, 4)
+
+        Return BytesToInt32(dwBuf)
+
+    End Function
+
+    Private Function ReadDwordAddr(fp As MemoryStream, addr As Integer) As Integer
         Dim dwBuf(3) As Byte
 
         RewindFileStream(fp, addr)

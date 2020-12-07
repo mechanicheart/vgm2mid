@@ -87,6 +87,7 @@
     <Import Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="util\FileUtil.vb" />
     <Compile Include="core\Memory.vb" />
     <Compile Include="Form1.vb">
       <SubType>Form</SubType>
