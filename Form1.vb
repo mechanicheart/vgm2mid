@@ -1184,39 +1184,115 @@ Public Class Form1
         ' + 00-10: Addressing Related To ADPCM
         ' + 30-B6: Addressing of FM Channel 4-6
 
-        Dim Chan As Integer
+        Dim Chan, ym_slot, ym_chip As Integer
+        Dim Vol As Double
 
         Registers(ym_reg + 256 * ym_port) = ym_val
 
         Select Case (ym_reg)
 
+            ' ym_port = ?
             Case &H28
                 'Key on
-                Chan = ym_val And &H7
+                ym_slot = ym_val And &H7
+                Chan = ym_val And &H3
+                ym_chip = (ym_val >> 2) And &H1
 
-                Slot(0, Chan) = (ym_val And &HFF) >> 4
-                NoteOn_Old(0, Chan) = NoteOn(0, Chan)
+                Slot(0, ym_slot) = (ym_val And &HFF) >> 4
+                NoteOn_Old(0, ym_slot) = NoteOn(0, ym_slot)
 
-                If (Slot(0, Chan) <> 0) Then
-                    'If (RegisterChanged) Then
+                'If (Slot(0, Chan) <> 0) Then
+                '    'If (RegisterChanged) Then
+
+                '    'capture current instrument
+                '    VolumeChangeAmount_old(0, Chan) = CurrentVoice(0, Chan).VolumeChangeAmount
+                '    CurrentVoice(0, Chan) = GetCurrentVoiceYM2608(Chan And &H3, (Chan >> 2) And &H1)
+
+                '    'compare with insturment list and add if its not there, get instrument number
+                '    VoiceID_old(0, Chan) = VoiceID(0, Chan)
+                '    VoiceID(0, Chan) = FindVoice(CurrentVoice(0, Chan).Voice)
+
+                '    RegisterChanged = False
+                '    NoteOn(0, Chan) = True
+                'Else
+                '    NoteOn(0, Chan) = False
+                'End If
+
+                If (Slot(ym_chip, Chan) <> 0) Then
+                    ' Instrument Comparision
 
                     'capture current instrument
-                    VolumeChangeAmount_old(0, Chan) = CurrentVoice(0, Chan).VolumeChangeAmount
-                    CurrentVoice(0, Chan) = GetCurrentVoiceYM2608(Chan And &H3, (Chan >> 2) And &H1)
+                    VolumeChangeAmount_old(ym_chip, Chan) = CurrentVoice(ym_chip, Chan).VolumeChangeAmount
+                    CurrentVoice(ym_chip, Chan) = GetCurrentVoiceYM2608(ym_chip, Chan)
 
-                    'compare with insturment list and add if its not there, get instrument number
-                    VoiceID_old(0, Chan) = VoiceID(0, Chan)
-                    VoiceID(0, Chan) = FindVoice(CurrentVoice(0, Chan).Voice)
+                    'compare with instrument list and add if its not there, get instrument number
+                    VoiceID_old(ym_chip, Chan) = VoiceID(ym_chip, Chan)
+                    VoiceID(ym_chip, Chan) = FindVoice(CurrentVoice(ym_chip, Chan).Voice)
+
+                    If (VoiceID_old(ym_chip, Chan) <> VoiceID(ym_chip, Chan)) Then
+                        Send_Midi(&HC0 + ym_slot, VoiceID(ym_chip, Chan), -1)
+                    End If
+
+                    'if volume change amount has changed then send volume command
+                    If (VolumeChangeAmount_old(ym_chip, Chan) <> CurrentVoice(ym_chip, Chan).VolumeChangeAmount) Then
+
+                        Vol = -(CurrentVoice(ym_chip, Chan).VolumeChangeAmount * 0.75)
+                        Vol = (10 ^ (Vol / 40)) * 127
+                        Vol = Vol * Gain
+
+                        If (Vol > MaxVol) Then MaxVol = Vol
+
+                        If Vol > 127 Then Vol = 127
+                        If Vol < 0 Then Vol = 0
+
+                        ' Volume Meta Event
+                        Send_Midi(&HB0 + ym_slot, 7, Vol)
+                    End If
 
                     RegisterChanged = False
-                    NoteOn(0, Chan) = True
+                    'End If
+
+                    NoteOn(ym_chip, Chan) = True
                 Else
-                    NoteOn(0, Chan) = False
+                    NoteOn(ym_chip, Chan) = False
+                End If
+
+                If (NoteOn_Old(ym_chip, Chan) <> NoteOn(ym_chip, Chan)) Then
+                    If (NoteOn(ym_chip, Chan)) Then
+                        If (Note(ym_chip, Chan) >= 0) Then
+                            Send_Midi(&H90 + ym_slot, Note(ym_chip, Chan), 127)
+                        Else
+                            ListBox2.Items.Add("Key on occured before note was set!")
+                        End If
+                    Else
+                        If (Note(ym_chip, Chan) >= 0) Then Send_Midi(&H80 + ym_slot, Note(ym_chip, Chan), 0)
+                    End If
                 End If
 
             ' Voice Registers
             Case &H30 To &H9F, &HB0 To &HB6
                 RegisterChanged = True
+
+            ' F-Number Low
+            ' Play Note
+            Case &HA0 To &HA2
+                Chan = ym_reg And &H3
+
+                FNumLow(ym_port, Chan) = ym_val
+
+                Note_Old(ym_port, Chan) = Note(ym_port, Chan)
+                Note(ym_port, Chan) = KeyCodeToMIDINoteYM2608(ym_port, Chan)
+
+                If (NoteOn(ym_port, Chan) And (Note(ym_port, Chan) <> Note_Old(ym_port, Chan))) Then
+                    If (Note_Old(ym_port, Chan) >= 0) Then Send_Midi(&H80 + Chan + 3 * ym_port, Note_Old(ym_port, Chan), 0)
+                    Send_Midi(&H90 + Chan + 3 * ym_port, Note(ym_port, Chan), 127)
+                End If
+
+            ' F-Number High and Octave Block
+            Case &HA4 To &HA6
+                Chan = ym_reg And &H3
+
+                FNumHigh(ym_port, Chan) = ym_val
 
         End Select
 
@@ -2280,6 +2356,25 @@ Public Class Form1
 
         ' YM2203 Freq Formula
         NoteFreq = (FNum * VGMFile.iFreqChip(chipTag.SND_YM2203)) / (1 << (20 - Block)) / 144.0
+        ' MIDI Mapper Offset
+        NoteVal = FindMIDINote(NoteFreq) + 9
+
+        Return (NoteVal)
+
+    End Function
+
+    Private Function KeyCodeToMIDINoteYM2608(port As Integer, ch As Integer) As Integer
+
+        Dim FNum As Double
+        Dim Block As Double
+        Dim NoteFreq As Double
+        Dim NoteVal As Integer
+
+        FNum = ((FNumHigh(port, ch) And &H7) << 8) + (FNumLow(port, ch) And &HFF)
+        Block = (FNumHigh(port, ch) >> 3) And &H7
+
+        ' YM2608 Freq Formula (Manual Page 24)
+        NoteFreq = (FNum * VGMFile.iFreqChip(chipTag.SND_YM2608)) / (1 << (20 - Block)) / 144.0
         ' MIDI Mapper Offset
         NoteVal = FindMIDINote(NoteFreq) + 9
 
