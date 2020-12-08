@@ -19,34 +19,40 @@ Namespace Core
 
             ' YM2203
             Public Class OPNChip : Inherits OPNxChip
-
-                Public Overrides Sub Init()
-                    Reg.BindMapper(New MMap.OPN.OPNMapper)
+                Public Sub New()
+                    Reg = New Memory()
+                    iOperatorCount = 4 : iChannelCount = 3 : fPortSupport = False
+                    Reg.BindMapper(New MMap.OPN.OPNMapper())
                 End Sub
+
+                Public Sub New(clk As Integer)
+                    Reg = New Memory()
+                    iMClock = clk : iOperatorCount = 4 : iChannelCount = 3 : fPortSupport = False
+                    Reg.BindMapper(New MMap.OPN.OPNMapper())
+                End Sub
+
             End Class
 
             ' YM2608
             Public Class OPNAChip : Inherits OPNxChip
                 Private ADPCMRom As Memory
-                Public Overrides Sub Init()
 
+                Public Sub New(clk As Integer)
+                    iMClock = clk : iOperatorCount = 4 : iChannelCount = 6 : fPortSupport = True
                 End Sub
-
             End Class
 
             ' YM2610
             Public Class OPNBChip : Inherits OPNxChip
                 Private ADPCMRomA As Memory
                 Private ADPCMRomB As Memory
-                Public Overrides Sub Init()
 
+                Public Sub New(clk As Integer)
+                    iMClock = clk : iOperatorCount = 4 : iChannelCount = 6 : fPortSupport = True
                 End Sub
             End Class
 
             Public Class OPN2Chip : Inherits OPNxChip
-                Public Overrides Sub Init()
-
-                End Sub
             End Class
 
         End Namespace

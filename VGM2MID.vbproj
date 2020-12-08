@@ -93,7 +93,7 @@
     <Compile Include="core\chip\sndchip\SndChip.vb" />
     <Compile Include="core\mapper\MemoryMapper.vb" />
     <Compile Include="generic\Instrument.vb" />
-    <Compile Include="core\mapper\FMMapper.vb" />
+    <Compile Include="core\mapper\SndChipMapper.vb" />
     <Compile Include="util\ArrayUtil.vb" />
     <Compile Include="util\FileUtil.vb" />
     <Compile Include="core\Memory.vb" />

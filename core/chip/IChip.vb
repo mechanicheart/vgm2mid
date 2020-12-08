@@ -1,8 +1,7 @@
 ﻿Namespace Core
     Public MustInherit Class IChip
-        Protected iMastClock As Integer
-        Protected iSlavClock As Integer
+        Protected iMClock As Integer
+        ' Protected iSClock As Integer
 
-        Public MustOverride Sub Init()
     End Class
 End Namespace

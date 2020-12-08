@@ -54,8 +54,8 @@
                 SL
                 KS
                 MUL
-                DT1
-                DT2
+                D1T
+                D2T
                 SSGEG
                 ' Channel
                 FNUM
@@ -69,7 +69,6 @@
 
         Namespace PSG
             Public Class PSGMapper : Inherits SndChipMapper
-                Private PSGMMapperUnit() As MapperUnit
                 Public Sub New()
                     ReDim Mapper(PSGMapperID.Length)
                     Mapper = {
@@ -114,11 +113,13 @@
                         New MapperUnit(True, &H28, 0, 0, 2, False, 0, 0, 0, FMMapperID.CHAN), ' Chan
                         New MapperUnit(True, &H28, 0, 4, 4, False, 0, 0, 0, FMMapperID.SLOT), ' Slot
                         New MapperUnit(True, &H30, 4, 0, 4, False, 0, 0, 0, FMMapperID.MUL), ' Multiple
-                        New MapperUnit(True, &H30, 4, 4, 3, False, 0, 0, 0, FMMapperID.DT1), ' Detune
+                        New MapperUnit(True, &H30, 4, 4, 3, False, 0, 0, 0, FMMapperID.D1T), ' Detune
+                        New MapperUnit(True, &H30, 4, 4, 3, False, 0, 0, 0, FMMapperID.D2T), ' Detune
                         New MapperUnit(True, &H40, 4, 0, 7, False, 0, 0, 0, FMMapperID.TL), ' Total Level
                         New MapperUnit(True, &H50, 4, 0, 5, False, 0, 0, 0, FMMapperID.AR), ' Attack Rate
                         New MapperUnit(True, &H50, 4, 6, 2, False, 0, 0, 0, FMMapperID.KS), ' Key Scale
                         New MapperUnit(True, &H60, 4, 0, 5, False, 0, 0, 0, FMMapperID.D1R), ' Decay Rate
+                        New MapperUnit(True, &H60, 4, 0, 5, False, 0, 0, 0, FMMapperID.D2R), ' Decay Rate
                         New MapperUnit(True, &H70, 4, 0, 5, False, 0, 0, 0, FMMapperID.SR), ' Sustain Rate
                         New MapperUnit(True, &H80, 4, 0, 4, False, 0, 0, 0, FMMapperID.RR), ' Release Rate
                         New MapperUnit(True, &H80, 4, 4, 4, False, 0, 0, 0, FMMapperID.SL), ' Sustain Level
@@ -131,7 +132,6 @@
                         New MapperUnit(True, &HB0, 0, 3, 3, False, 0, 0, 0, FMMapperID.FB) 'FeedBack
                     }
                 End Sub
-
 
             End Class
             Public Class OPNAMapper : Inherits SndChipMapper

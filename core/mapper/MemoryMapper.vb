@@ -36,9 +36,8 @@ Namespace Core
                     If (hID = Mapper(i).hMapperID) Then
                         Return Mapper(i)
                     End If
-
-                    Return Nothing
                 Next
+                Return Nothing
             End Function
 
             Public ReadOnly Property Addr(hID As Long, extra As Boolean) As Integer

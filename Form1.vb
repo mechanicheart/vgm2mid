@@ -3,6 +3,8 @@ Imports System.Text
 Imports System.Math
 
 Imports VGM2MID.Util
+Imports VGM2MID.Core
+Imports VGM2MID.Instrument
 
 Public Class Form1
 
@@ -40,7 +42,7 @@ Public Class Form1
 
     End Structure
 
-    Private Structure Operator_Struct
+    Public Structure Operator_Struct
 
         ' Attack Rate
         Dim AR As Integer
@@ -74,7 +76,7 @@ Public Class Form1
 
     End Structure
 
-    Private Structure Voice_Struct
+    Public Structure Voice_Struct
         ' Voice Name
         Dim Name As String
 
@@ -384,6 +386,11 @@ Public Class Form1
     Dim VGMFile As VGMFile_Struct
     Dim GD3Tag As GD3Tag_Struct
 
+    Dim opntest As SndChip.OPN.OPNChip() = {
+        New SndChip.OPN.OPNChip(),
+        New SndChip.OPN.OPNChip()
+    }
+
     Private Sub WriteDataBlock(iDataType As Integer, szFileName As String, byteData As Byte(), iDataLength As Integer)
         Dim pOutFileStream As FileStream
         Dim szOutFileName As String = szFileName
@@ -591,6 +598,9 @@ Public Class Form1
     End Function
 
     Private Function GetCurrentVoiceYM2203(chip As Integer, chan As Integer) As CurrVoice_Struct
+
+        ' Test
+        ' Dim voice As FMInstrument = opntest(chip).DumpFM(chan)
 
         Dim curr_voice As CurrVoice_Struct
         Dim op As Integer
@@ -1074,6 +1084,7 @@ Public Class Form1
         Dim Vol As Double
 
         Registers(ym_reg + ym_chip * 256) = ym_val
+        ' opntest(ym_chip).Write(0, ym_reg, ym_val)
 
         Select Case (ym_reg)
 
