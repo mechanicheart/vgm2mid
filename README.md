@@ -16,6 +16,7 @@ Visual Basic Version Of VGM2MID Tool (Original By W.J.Holt)
 
 
 -- Issues
+
 There are some known issues in the current project:
 - FM Instruments are not 100% correctly dumped.
 - MIDI note sometimes seems to be glitchy.
