@@ -8,7 +8,7 @@ Visual Basic Version Of VGM2MID Tool (Original By W.J.Holt)
     
 + v0.11
     - GZip implemented (.vgz are now supported)
-    - Fix path loading errori
+    - Fix path loading error
     - Fix problems about YM2203 operators
     
 + v0.12
