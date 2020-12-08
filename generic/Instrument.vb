@@ -13,117 +13,113 @@
         Public MustOverride Function CompareTo(instr As Instrument) As Boolean
     End Class
 
-    Public Class FMInstrument
-        Inherits Instrument
-        Public Structure stFMInstrAttr
-            Private iAttrAR As Integer
-            Private iAttrD1R As Integer
-            Private iAttrD2R As Integer
-            Private iAttrSR As Integer
-            Private iAttrRR As Integer
+    Public Class FMInstrument : Inherits Instrument
+        Public Structure stFMInstrOp
+            Public iAttrAR As Integer
+            Public iAttrD1R As Integer
+            Public iAttrD2R As Integer
+            Public iAttrSR As Integer
+            Public iAttrRR As Integer
 
-            Private iAttrD1L As Integer
-            Private iAttrD2L As Integer
-            Private iAttrTL As Integer
-            Private iAttrSL As Integer
-
-            Public Property AR() As Integer
-                Get
-                    Return iAttrAR
-                End Get
-                Set(val As Integer)
-                    iAttrAR = val
-                End Set
-            End Property
-
-            Public Property D1R() As Integer
-                Get
-                    Return iAttrD1R
-                End Get
-                Set(val As Integer)
-                    iAttrD1R = val
-                End Set
-            End Property
-
-            Public Property D2R() As Integer
-                Get
-                    Return iAttrD2R
-                End Get
-                Set(val As Integer)
-                    iAttrD2R = val
-                End Set
-            End Property
-
-            Public Property SR() As Integer
-                Get
-                    Return iAttrSR
-                End Get
-                Set(val As Integer)
-                    iAttrSR = val
-                End Set
-            End Property
-
-            Public Property RR() As Integer
-                Get
-                    Return iAttrRR
-                End Get
-                Set(val As Integer)
-                    iAttrRR = val
-                End Set
-            End Property
-
-            Public Property D1L() As Integer
-                Get
-                    Return iAttrD1L
-                End Get
-                Set(val As Integer)
-                    iAttrD1L = val
-                End Set
-            End Property
-
-            Public Property D2L() As Integer
-                Get
-                    Return iAttrD2L
-                End Get
-                Set(val As Integer)
-                    iAttrD2L = val
-                End Set
-            End Property
-
-            Public Property TL() As Integer
-                Get
-                    Return iAttrTL
-                End Get
-                Set(val As Integer)
-                    iAttrTL = val
-                End Set
-            End Property
-
-            Public Property SL() As Integer
-                Get
-                    Return iAttrSL
-                End Get
-                Set(val As Integer)
-                    iAttrSL = val
-                End Set
-            End Property
-
+            Public iAttrD1L As Integer
+            Public iAttrD2L As Integer
+            Public iAttrTL As Integer
+            Public iAttrSL As Integer
         End Structure
 
-        Private stAttr As stFMInstrAttr = New stFMInstrAttr
+        Public stAttr() As stFMInstrOp
 
-        Public ReadOnly Property Attr() As stFMInstrAttr
+        Public Property AR(id As Integer) As Integer
             Get
-                Return stAttr
+                Return stAttr(id).iAttrAR
             End Get
+            Set(val As Integer)
+                stAttr(id).iAttrAR = val
+            End Set
+        End Property
+
+        Public Property D1R(id As Integer) As Integer
+            Get
+                Return stAttr(id).iAttrD1R
+            End Get
+            Set(val As Integer)
+                stAttr(id).iAttrD1R = val
+            End Set
+        End Property
+
+        Public Property D2R(id As Integer) As Integer
+            Get
+                Return stAttr(id).iAttrD2R
+            End Get
+            Set(val As Integer)
+                stAttr(id).iAttrD2R = val
+            End Set
+        End Property
+
+        Public Property SR(id As Integer) As Integer
+            Get
+                Return stAttr(id).iAttrSR
+            End Get
+            Set(val As Integer)
+                stAttr(id).iAttrSR = val
+            End Set
+        End Property
+
+        Public Property RR(id As Integer) As Integer
+            Get
+                Return stAttr(id).iAttrRR
+            End Get
+            Set(val As Integer)
+                stAttr(id).iAttrRR = val
+            End Set
+        End Property
+
+        Public Property D1L(id As Integer) As Integer
+            Get
+                Return stAttr(id).iAttrD1L
+            End Get
+            Set(val As Integer)
+                stAttr(id).iAttrD1L = val
+            End Set
+        End Property
+
+        Public Property D2L(id As Integer) As Integer
+            Get
+                Return stAttr(id).iAttrD2L
+            End Get
+            Set(val As Integer)
+                stAttr(id).iAttrD2L = val
+            End Set
+        End Property
+
+        Public Property TL(id As Integer) As Integer
+            Get
+                Return stAttr(id).iAttrTL
+            End Get
+            Set(val As Integer)
+                stAttr(id).iAttrTL = val
+            End Set
+        End Property
+
+        Public Property SL(id As Integer) As Integer
+            Get
+                Return stAttr(id).iAttrSL
+            End Get
+            Set(val As Integer)
+                stAttr(id).iAttrSL = val
+            End Set
         End Property
 
         Public Overrides Function CompareTo(instr As Instrument) As Boolean
-
-
             Return True
         End Function
 
+    End Class
+
+    Public Class PSGInstrument : Inherits Instrument
+        Public Overrides Function CompareTo(instr As Instrument) As Boolean
+            Return True
+        End Function
     End Class
 
 End Namespace

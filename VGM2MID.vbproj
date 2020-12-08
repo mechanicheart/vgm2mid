@@ -87,8 +87,10 @@
     <Import Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="core\chip\dac\DacChip.vb" />
+    <Compile Include="core\chip\IChip.vb" />
     <Compile Include="core\chip\sndchip\OPM.vb" />
-    <Compile Include="core\chip\SndChip.vb" />
+    <Compile Include="core\chip\sndchip\SndChip.vb" />
     <Compile Include="core\mapper\MemoryMapper.vb" />
     <Compile Include="generic\Instrument.vb" />
     <Compile Include="core\mapper\FMMapper.vb" />
@@ -154,9 +156,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="core\chip\dac\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

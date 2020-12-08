@@ -6,6 +6,8 @@ Namespace Core
         ' Address: 32-Bits (Integer)
         ' Data: 8-Bits (Byte)
         Private bMem() As Byte
+        Private mMap As MMap.SndChipMapper
+        Private fMap As Boolean
 
         ' ----------------------------------------------------------------------
         ' Public Properties
@@ -42,6 +44,21 @@ Namespace Core
         Public Function Read(addr As Integer) As Byte
             Return bMem(addr)
         End Function
+
+        Public Function Read(hID As Integer, id As Integer, blk As Integer) As Byte
+            If (fMap) Then
+                If (mMap.Extra(hID)) Then
+                    Return ((bMem(mMap.Addr(hID, id, blk, True)) >> mMap.Shift(hID, True)) And mMap.Mask(hID, True) << 8) Or ((bMem(mMap.Addr(hID, id, blk, False)) >> mMap.Shift(hID, False)) And mMap.Mask(hID, False))
+                End If
+                Return (bMem(mMap.Addr(hID, id, blk, False)) >> mMap.Shift(hID, False)) And mMap.Mask(hID, False)
+            Else
+                Return 0
+            End If
+        End Function
+
+        Public Sub BindMapper(map As MMap.SndChipMapper)
+            mMap = map : fMap = True
+        End Sub
 
     End Class
 End Namespace
