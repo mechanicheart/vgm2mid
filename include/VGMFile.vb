@@ -70,7 +70,7 @@ Public Class VGMFile
         SND_GA20
     End Enum
 
-    Public Sub open(file As String())
+    Public Sub Open(file As String())
         Dim hFile As FileStream
         Dim i As Integer
 
@@ -84,18 +84,14 @@ Public Class VGMFile
 
     End Sub
 
-    Public Sub close()
+    Public Sub Close()
         For i = 0 To iFileCount
             hFileList(i).Close()
         Next
     End Sub
 
-    Public Sub parse()
+    Public Sub Parse()
 
     End Sub
-
-    Public Function readChipTag(id As iVGMChipID) As String
-        Return szChipTag(id)
-    End Function
 
 End Class

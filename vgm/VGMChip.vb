@@ -1,8 +1,3 @@
-﻿Imports System.IO
-
-Public Class VGMChip
-
-
-
+﻿Public Class VGMChip
 
 End Class

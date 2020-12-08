@@ -87,6 +87,12 @@
     <Import Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="core\chip\sndchip\OPM.vb" />
+    <Compile Include="core\chip\SndChip.vb" />
+    <Compile Include="core\mapper\MemoryMapper.vb" />
+    <Compile Include="generic\Instrument.vb" />
+    <Compile Include="core\mapper\FMMapper.vb" />
+    <Compile Include="util\ArrayUtil.vb" />
     <Compile Include="util\FileUtil.vb" />
     <Compile Include="core\Memory.vb" />
     <Compile Include="Form1.vb">
@@ -97,6 +103,8 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="include\VGMFile.vb" />
+    <Compile Include="util\HashUtil.vb" />
+    <Compile Include="util\MemoryUtil.vb" />
     <Compile Include="vgm\VGMChip.vb" />
     <Compile Include="KeyCode.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
@@ -115,7 +123,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="chip\OPN.vb" />
+    <Compile Include="core\chip\sndchip\OPN.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Form1.resx">
@@ -145,6 +153,9 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="core\chip\dac\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,10 +1,8 @@
 ﻿Imports System.IO
 Imports System.Text
 Imports System.Math
-Imports System.Xml.XPath
 
 Imports VGM2MID.Util
-Imports System.IO.Compression
 
 Public Class Form1
 
@@ -453,7 +451,7 @@ Public Class Form1
         If (v1.CON <> v2.CON) Then Return (False)
         If (v1.AMS <> v2.AMS) Then Return (False)
         If (v1.PMS <> v2.PMS) Then Return (False)
-        If (v1.SLOT <> v2.SLOT) Then Return (False)
+        ' If (v1.SLOT <> v2.SLOT) Then Return (False)
         If (v1.NE <> v2.NE) Then Return (False)
 
         For op = 0 To 3
@@ -852,6 +850,99 @@ Public Class Form1
 
     End Function
 
+    Private Function GetCurrentVoiceYM2612(chan As Integer, port As Integer) As CurrVoice_Struct
+
+        Dim curr_voice As CurrVoice_Struct
+        Dim i, op As Integer
+        Dim TL_Min As Integer
+
+        'Dim TL_Change_Count As Integer
+
+        ReDim curr_voice.Voice.Op(3)
+
+        curr_voice.Voice.Name = ""
+
+        curr_voice.Voice.AMS = 0
+        curr_voice.Voice.PMS = 0
+
+        curr_voice.Voice.LFRQ = 0
+        curr_voice.Voice.AMD = 0
+        curr_voice.Voice.PMD = 0
+        curr_voice.Voice.WF = 0
+        curr_voice.Voice.NFRQ = 0
+        curr_voice.Voice.PAN = 0
+        ' FeedBack
+        curr_voice.Voice.FL = ((Registers(&HB0 + chan) >> 3) + 256 * port) And 7
+        ' Connect
+        curr_voice.Voice.CON = (Registers(&HB0 + chan) + 256 * port) And 7
+        ' Slot
+        curr_voice.Voice.SLOT = ((Registers(&H28) >> 4)) And &HF
+        curr_voice.Voice.NE = 0
+
+        For i = 0 To 3
+            op = i
+            curr_voice.Voice.Op(op).AR = Registers(&H50 + chan + (op * 4) + 256 * port) And 31
+            curr_voice.Voice.Op(op).D1R = Registers(&H60 + chan + (op * 4) + 256 * port) And 31
+            curr_voice.Voice.Op(op).D2R = 0
+            curr_voice.Voice.Op(op).SR = Registers(&H70 + chan + (op * 4) + 256 * port) And 15
+            curr_voice.Voice.Op(op).RR = Registers(&H80 + chan + (op * 4) + 256 * port) And 15
+            curr_voice.Voice.Op(op).D1L = 0
+            curr_voice.Voice.Op(op).TL = Registers(&H40 + chan + (op * 4) + 256 * port) And 127
+            curr_voice.Voice.Op(op).KS = (Registers(&H50 + chan + (op * 4) + 256 * port) >> 6) And 3
+            curr_voice.Voice.Op(op).MUL = Registers(&H30 + chan + (op * 4) + 256 * port) And 15
+            curr_voice.Voice.Op(op).DT1 = (Registers(&H30 + chan + (op * 4) + 256 * port) >> 4) And 7
+            curr_voice.Voice.Op(op).DT2 = 0
+            curr_voice.Voice.Op(op).SSGEG = Registers(&H90 + chan + (op * 4) + 256 * port) And 15
+            curr_voice.Voice.Op(op).AME = (Registers(&H60 + chan + (op * 4) + 256 * port) >> 7) And 15
+        Next
+
+        For i = 1 To 2
+            op = 3 - i
+            curr_voice.Voice.Op(op).AR = Registers(&H50 + chan + (op * 4) + 256 * port) And 31
+            curr_voice.Voice.Op(op).D1R = Registers(&H60 + chan + (op * 4) + 256 * port) And 31
+            curr_voice.Voice.Op(op).D2R = 0
+            curr_voice.Voice.Op(op).SR = Registers(&H70 + chan + (op * 4) + 256 * port) And 15
+            curr_voice.Voice.Op(op).RR = Registers(&H80 + chan + (op * 4) + 256 * port) And 15
+            curr_voice.Voice.Op(op).D1L = 0
+            curr_voice.Voice.Op(op).TL = Registers(&H40 + chan + (op * 4) + 256 * port) And 127
+            curr_voice.Voice.Op(op).KS = (Registers(&H50 + chan + (op * 4) + 256 * port) >> 6) And 3
+            curr_voice.Voice.Op(op).MUL = Registers(&H30 + chan + (op * 4) + 256 * port) And 15
+            curr_voice.Voice.Op(op).DT1 = (Registers(&H30 + chan + (op * 4) + 256 * port) >> 4) And 7
+            curr_voice.Voice.Op(op).DT2 = 0
+            curr_voice.Voice.Op(op).SSGEG = Registers(&H90 + chan + (op * 4) + 256 * port) And 15
+            curr_voice.Voice.Op(op).AME = (Registers(&H60 + chan + (op * 4) + 256 * port) >> 7) And 15
+        Next
+
+        'maximise volume
+        TL_Min = 255
+        'TL_Change_Count = 0
+        For op = 0 To 3
+            If (Carrier(curr_voice.Voice.CON, op)) Then
+                If (TL_Min > curr_voice.Voice.Op(op).TL) Then TL_Min = curr_voice.Voice.Op(op).TL
+            End If
+        Next
+
+        If (TL_Min <= 127) Then
+
+            For op = 0 To 3
+                If (Carrier(curr_voice.Voice.CON, op)) Then
+                    curr_voice.Voice.Op(op).TL = curr_voice.Voice.Op(op).TL - TL_Min
+                    'TL_Change_Count = TL_Change_Count + 1
+                End If
+            Next
+
+            curr_voice.VolumeChangeAmount = TL_Min
+            'ListBox2.Items.Add("VolumeChangeAmount= " + TL_Min.ToString)
+
+        Else
+            curr_voice.VolumeChangeAmount = 0
+            ListBox2.Items.Add("Did not find minimum TL")
+        End If
+
+        Return (curr_voice)
+
+    End Function
+
     Private Sub SendYM()
 
         Dim KF_PB As Integer
@@ -1204,8 +1295,8 @@ Public Class Form1
                 Chan = ym_val And &H3
                 ym_chip = (ym_val >> 2) And &H1
 
-                Slot(0, ym_slot) = (ym_val And &HFF) >> 4
-                NoteOn_Old(0, ym_slot) = NoteOn(0, ym_slot)
+                Slot(ym_chip, Chan) = (ym_val And &HFF) >> 4
+                NoteOn_Old(ym_chip, Chan) = NoteOn(ym_chip, Chan)
 
                 'If (Slot(0, Chan) <> 0) Then
                 '    'If (RegisterChanged) Then
@@ -1351,6 +1442,112 @@ Public Class Form1
 
     End Sub
 
+    Private Sub SendYM2612(ym_port As Integer)
+
+        ' ym_port <= [A1]
+        ' 1) A1 = 0
+        ' + 00-2F: Addressing of SSG, Commonness Part of FM (LFO, Timers, Key On/Off, DAC)
+        ' + 30-B6: Addressing of FM Channel 1-3
+        ' 1) A1 = 1
+        ' + 30-B6: Addressing of FM Channel 4-6
+
+        Dim Chan, ym_slot, ym_chip As Integer
+        Dim Vol As Double
+
+        Registers(ym_reg + 256 * ym_port) = ym_val
+
+        Select Case (ym_reg)
+
+            ' ym_port = ?
+            Case &H28
+                'Key on
+                ym_slot = ym_val And &H7
+                Chan = ym_val And &H3
+                ym_chip = (ym_val >> 2) And &H1
+
+                Slot(ym_chip, Chan) = (ym_val And &HFF) >> 4
+                NoteOn_Old(ym_chip, Chan) = NoteOn(ym_chip, Chan)
+
+                If (Slot(ym_chip, Chan) <> 0) Then
+                    ' Instrument Comparision
+
+                    'capture current instrument
+                    VolumeChangeAmount_old(ym_chip, Chan) = CurrentVoice(ym_chip, Chan).VolumeChangeAmount
+                    CurrentVoice(ym_chip, Chan) = GetCurrentVoiceYM2612(ym_chip, Chan)
+
+                    'compare with instrument list and add if its not there, get instrument number
+                    VoiceID_old(ym_chip, Chan) = VoiceID(ym_chip, Chan)
+                    VoiceID(ym_chip, Chan) = FindVoice(CurrentVoice(ym_chip, Chan).Voice)
+
+                    If (VoiceID_old(ym_chip, Chan) <> VoiceID(ym_chip, Chan)) Then
+                        Send_Midi(&HC0 + ym_slot, VoiceID(ym_chip, Chan), -1)
+                    End If
+
+                    'if volume change amount has changed then send volume command
+                    If (VolumeChangeAmount_old(ym_chip, Chan) <> CurrentVoice(ym_chip, Chan).VolumeChangeAmount) Then
+
+                        Vol = -(CurrentVoice(ym_chip, Chan).VolumeChangeAmount * 0.75)
+                        Vol = (10 ^ (Vol / 40)) * 127
+                        Vol = Vol * Gain
+
+                        If (Vol > MaxVol) Then MaxVol = Vol
+
+                        If Vol > 127 Then Vol = 127
+                        If Vol < 0 Then Vol = 0
+
+                        ' Volume Meta Event
+                        Send_Midi(&HB0 + ym_slot, 7, Vol)
+                    End If
+
+                    RegisterChanged = False
+                    'End If
+
+                    NoteOn(ym_chip, Chan) = True
+                Else
+                    NoteOn(ym_chip, Chan) = False
+                End If
+
+                If (NoteOn_Old(ym_chip, Chan) <> NoteOn(ym_chip, Chan)) Then
+                    If (NoteOn(ym_chip, Chan)) Then
+                        If (Note(ym_chip, Chan) >= 0) Then
+                            Send_Midi(&H90 + ym_slot, Note(ym_chip, Chan), 127)
+                        Else
+                            ListBox2.Items.Add("Key on occured before note was set!")
+                        End If
+                    Else
+                        If (Note(ym_chip, Chan) >= 0) Then Send_Midi(&H80 + ym_slot, Note(ym_chip, Chan), 0)
+                    End If
+                End If
+
+            ' Voice Registers
+            Case &H30 To &H9F, &HB0 To &HB6
+                RegisterChanged = True
+
+            ' F-Number Low
+            ' Play Note
+            Case &HA0 To &HA2
+                Chan = ym_reg And &H3
+
+                FNumLow(ym_port, Chan) = ym_val
+
+                Note_Old(ym_port, Chan) = Note(ym_port, Chan)
+                Note(ym_port, Chan) = KeyCodeToMIDINoteYM2612(ym_port, Chan)
+
+                If (NoteOn(ym_port, Chan) And (Note(ym_port, Chan) <> Note_Old(ym_port, Chan))) Then
+                    If (Note_Old(ym_port, Chan) >= 0) Then Send_Midi(&H80 + Chan + 3 * ym_port, Note_Old(ym_port, Chan), 0)
+                    Send_Midi(&H90 + Chan + 3 * ym_port, Note(ym_port, Chan), 127)
+                End If
+
+            ' F-Number High and Octave Block
+            Case &HA4 To &HA6
+                Chan = ym_reg And &H3
+
+                FNumHigh(ym_port, Chan) = ym_val
+
+        End Select
+
+    End Sub
+
     Private Sub Parse()
 
         ' Sampling Rate: 44100 Hz
@@ -1400,7 +1597,7 @@ Public Class Form1
             ' 0xBD: SAA1099
             ' 0xBE: ES5506
             ' 0xBF: GA20
-            Case &H40 To &H4E, &H51 To &H53, &H5B To &H5F, &HA0 To &HA4, &HA6 To &HBF
+            Case &H40 To &H4E, &H51, &H5B To &H5F, &HA0 To &HA4, &HA6 To &HBF
                 in_file.Read(d, 0, 2) : filepos = filepos + 2
                 in_file.Read(d, 0, 1) : filepos = filepos + 1
 
@@ -1429,6 +1626,20 @@ Public Class Form1
 
                 ' ** Main YM2151 Processing Subroutine
                 SendYM()
+
+            ' ------------------------------------------------------------------------
+            ' YM2612 Handling Procedure
+            Case &H52 To &H53
+                Dim ym_port As Integer = d(0) And &H1
+
+                in_file.Read(d, 0, 2) : filepos = filepos + 2
+                ' 0x56 [dd] [aa]:  Write {dd} to Register {aa} (Port 0)
+                ym_reg = d(0)   ' dd
+                ym_val = d(1)   ' aa
+
+                in_file.Read(d, 0, 1) : filepos = filepos + 1
+
+                SendYM2612(ym_port)
 
             ' ------------------------------------------------------------------------
             ' YM2203 Handling Procedure
@@ -2085,8 +2296,8 @@ Public Class Form1
         Dim temp As Double
         Dim BPM_Period As Integer
 
-        Dim hFile, hTmp As FileStream
-        Dim hGZFile As GZipStream
+        ' Dim hFile, hTmp As FileStream
+        ' Dim hGZFile As GZipStream
 
         ' Clear The Status List
         ListBox1.Items.Clear()
@@ -2095,26 +2306,14 @@ Public Class Form1
         'we need to check if file is already open
         If (in_file IsNot Nothing) Then in_file.Close()
 
-        ' Initialize
-        in_file = New MemoryStream()
+        ' Get File Name From The Text Box And Create an Memory Stream
+        in_file = FileUtil.LoadFileMemory(TextBox1.Text)
+        szOrigFileName = TextBox1.Text
 
         ' Check if the input string is not an illegal path
-        If Dir(TextBox1.Text) = "" Then Exit Sub
+        ' If Dir(TextBox1.Text) = "" Then Exit Sub
 
-        ' Get File Name From The Text Box And Create an File Stream
-        hTmp = New FileStream(TextBox1.Text, FileMode.Open)
-        szOrigFileName = hTmp.Name
-        hTmp.Read(d, 0, 3)
-        hTmp.Close()
-        If ((d(0) = &H1F) And (d(1) = &H8B)) Then
-            hGZFile = FileHandler.GZRead(TextBox1.Text)
-            hGZFile.CopyTo(in_file)
-            hGZFile.Close()
-        Else
-            hFile = New FileStream(TextBox1.Text, FileMode.Open)
-            hFile.CopyTo(in_file)
-            hFile.Close()
-        End If
+        If (in_file Is Nothing) Then Exit Sub
 
         ' Rewind
         in_file.Seek(0, SeekOrigin.Begin)
@@ -2400,6 +2599,25 @@ Public Class Form1
 
         ' YM2608 Freq Formula (Manual Page 24)
         NoteFreq = (FNum * VGMFile.iFreqChip(chipTag.SND_YM2608)) / (1 << (20 - Block)) / 144.0
+        ' MIDI Mapper Offset
+        NoteVal = FindMIDINote(NoteFreq) + 9
+
+        Return (NoteVal)
+
+    End Function
+
+    Private Function KeyCodeToMIDINoteYM2612(port As Integer, ch As Integer) As Integer
+
+        Dim FNum As Double
+        Dim Block As Double
+        Dim NoteFreq As Double
+        Dim NoteVal As Integer
+
+        FNum = ((FNumHigh(port, ch) And &H7) << 8) + (FNumLow(port, ch) And &HFF)
+        Block = (FNumHigh(port, ch) >> 3) And &H7
+
+        ' YM2608 Freq Formula (Manual Page 24)
+        NoteFreq = (FNum * VGMFile.iFreqChip(chipTag.SND_YM2612)) / (1 << (20 - Block)) / 144.0
         ' MIDI Mapper Offset
         NoteVal = FindMIDINote(NoteFreq) + 9
 
