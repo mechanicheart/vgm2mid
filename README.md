@@ -3,22 +3,22 @@ Visual Basic Version Of VGM2MID Tool (Original By W.J.Holt)
 
 -- Version
 + v0.1
-    - Add YM2151, YM2203, YM2608 Support (Note: OPNx SSG and dual chip support may not work properly)
-    - Add YM2610 ADPCM-A & ADPCM-B Support
+    - Add YM2151, YM2203, YM2608 support (Note: OPNx SSG and dual chip support may not work properly)
+    - Add YM2610 ADPCM-A & ADPCM-B support
     
 + v0.11
-    - GZip Implemented (.vgz are now supported)
-    - Fix path loading error
+    - GZip implemented (.vgz are now supported)
+    - Fix path loading errori
     - Fix problems about YM2203 operators
     
 + v0.12
-    - Add YM2612 Support
+    - Add YM2612 support
 
 
 -- Issues
 
 There are some known issues in the current project:
-- FM Instruments are not 100% correctly dumped.
+- FM instruments are not 100% correctly dumped.
 - MIDI note sometimes seems to be glitchy.
 
 
